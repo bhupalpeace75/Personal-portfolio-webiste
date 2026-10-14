@@ -1,0 +1,16 @@
+# Website portraits
+
+Created with the built-in image generation tool from the user-supplied `p4.jpeg`, preserving recognizable facial features while changing wardrobe, setting, lighting, and pose. These are AI-generated portraits based on the supplied photo, not photographs of actual office sessions.
+
+- Hero: `public/portraits/bhupendra-hero.png` — navy blazer, light grey open-collar shirt, soft neutral background.
+- About: `public/portraits/bhupendra-about.png` — light blue shirt, relaxed desk setting, warm daylight.
+
+Edit `heroPhoto` and `aboutPhoto` in `lib/business.ts` to replace them independently. Next.js generates responsive optimized image versions. The source PNGs are preserved unchanged.
+
+## Hero generation prompt
+
+Use case: identity-preserve. Edit the supplied photograph into a photorealistic professional website HERO portrait of this exact same man, Bhupendra. Preserve his recognizable facial identity, face shape, eyes, eyebrows, nose, lips, skin tone, hairline and short black hairstyle, natural age and build. Do not replace him with a model or alter his ethnicity. Change wardrobe to a well-fitted dark navy smart-casual blazer over a light grey open-collar shirt, no tie. Pose: relaxed upright, body at a slight angle, looking directly at the camera with a warm natural subtle smile and approachable eyes; no crossed arms. Frame from mid-torso up, head and both shoulders fully visible, subject centered with generous headroom. Clean soft warm off-white/light sage studio background subtly coordinated with a forest-green and navy personal marketing website. Soft natural window-like lighting, realistic skin texture, minimal natural retouching, editorial business portrait photography, crisp face and understated background. Vertical portrait 4:5 style composition. No words, no logos, no artificial robot/circuit imagery, no dramatic glow, no excessive smoothing. Professional, friendly and approachable.
+
+## About generation prompt
+
+Use case: identity-preserve. Edit the supplied photograph into a photorealistic ABOUT PAGE portrait of this exact same man, Bhupendra. Identity reference only: preserve his recognizable face, eye shape, eyebrows, nose, lips, hairline and short black hair, natural skin tone, age and build. Do not substitute another person or beautify his features into a generic model. Show him seated comfortably at a simple light wooden desk in a bright modest modern office, wearing a crisp light blue open-collar shirt, no tie, no blazer. Relaxed shoulders, natural hands resting on the desk, leaning slightly forward as if welcoming a client into a conversation. Look into the camera with a warm gentle natural smile and approachable eyes. Frame waist/chest up with full head, ample headroom, and shoulders visible, vertical 4:5 portrait. A closed plain laptop discreetly at the lower edge, no visible brand. Background softly out of focus with a small green plant and warm neutral walls, natural daylight, realistic editorial professional photography. Friendly, calm and professional rather than posed corporate stiffness. Natural skin texture and minimal retouching. Do not change face shape or age. No words, charts, brand names, robotics, glow or artificial effects.
