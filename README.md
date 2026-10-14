@@ -56,18 +56,18 @@ Set `bookingUrl` in `lib/business.ts` to your full HTTPS Calendly or other booki
 
 ## FormSubmit email delivery
 
-The form is connected to `https://formsubmit.co/bhupendrastha2024@gmail.com`. No Resend, Turnstile, API key, or verified sender domain is required. The owner confirmed FormSubmit activation on 13 October 2026.
+The form sends through FormSubmit's AJAX endpoint to `bhupendrastha2024@gmail.com`, using the recipient in `lib/business.ts`. No Resend, Turnstile, API key, or verified sender domain is required. The owner confirmed activation and live-domain test email receipt on 14 October 2026.
 
-With JavaScript, the website checks required fields, email, optional HTTP(S) website URL, and lengths locally and through `/api/inquiries`. That endpoint validates only; it never sends mail or reports delivery success. The browser then performs a native POST to FormSubmit. FormSubmit keeps its built-in CAPTCHA enabled and displays its actual submission result. Complete that verification to send an inquiry. No custom thank-you redirect or fake success state is used. Without JavaScript, the browser's native required/email/URL validation and FormSubmit submission remain available.
+The browser checks required fields, email, optional HTTP(S) website URL, and lengths, then sends JSON to `/api/inquiries`. The server validates again and sends the seven cleaned fields to FormSubmit's documented AJAX endpoint. Visitors stay on Contact throughout loading, success, and errors. Success requires an HTTP success and an explicit provider success response; this confirms acceptance for delivery, not inbox receipt or a reserved meeting. Unconfirmed results keep the entered details. JavaScript is required for the form; the email link remains available without it.
 
-The email subject is `New consultation inquiry — Digital Bhupendra`. All seven fields are included in the email, with the visitor's email enabling Reply-To. Spam prevention includes the provider CAPTCHA, a honeypot, and a minimum completion time in the enhanced preflight. The button is locked during submission to prevent accidental repeated clicks. Going back from the provider page restores the form button. Inquiries are not saved in a website database or added to a marketing list. FormSubmit retains submissions in its archive for 30 days, as described in its documentation; review your inbox retention practices too.
+The email subject is `New consultation inquiry — Digital Bhupendra`. The visitor's email enables Reply-To. Spam controls include same-origin validation, a honeypot, input limits, a minimum completion time, and a limit of five attempts per address per ten minutes. The server uses bounded in-memory maps for hashed address and submission identifiers; rate limits and duplicate suppression are best effort per running instance, not shared across serverless replicas. Repeat requests share one provider operation. Accepted receipts are remembered for ten minutes; uncertain failures for thirty seconds to reduce accidental repeat sends. The button locks during submission and after acceptance. No `_captcha=false` option is sent; the documented AJAX flow does not navigate to an interactive provider page. Inquiries are not saved in a website database or added to a marketing list. FormSubmit retains submissions in its archive for 30 days, as described in its documentation; review your inbox retention practices too.
 
-If you change `business.email` in `lib/business.ts`, the action automatically changes to the new address. Send a test and activate that recipient if prompted. Test again from the final deployed website. Check Inbox and Spam for test inquiries.
+If you change `business.email` in `lib/business.ts`, the server recipient changes too. Send a test and activate that recipient if prompted. Test again from the final deployed website. Check Inbox and Spam for test inquiries.
 
-Official references: [FormSubmit setup](https://formsubmit.co/), [field options and data retention](https://formsubmit.co/documentation), [privacy policy](https://formsubmit.co/privacy.pdf).
+Official references: [AJAX submission](https://formsubmit.co/ajax-documentation), [field options and data retention](https://formsubmit.co/documentation), [privacy policy](https://formsubmit.co/privacy.pdf).
 ## Deploy
 
-This project needs a Node-capable Next.js host because the inquiry preflight performs server-side validation. It is not a static export.
+This project needs a Node-capable Next.js host because the inquiry endpoint performs server-side validation and delivery. It is not a static export. The current live site is https://cafe.bhupendrashrestha.com.np.
 
 For Vercel or another Next.js host, import the source repository, choose the Next.js preset, and set the environment variables above in the host dashboard. Use `npm ci` and `npm run build`; for a self-hosted Node server use `npm start` behind an HTTPS reverse proxy. The server must receive the original `Host` header. `NEXT_PUBLIC_SITE_URL` must match the origin visitors use, including `www` if applicable; redirect alternate hostnames to that origin. Keep secrets out of Git and rebuild when public variables change.
 
@@ -77,7 +77,7 @@ Configure your domain and HTTPS, confirm FormSubmit delivery from the deployed s
 
 - Provide the final domain / `NEXT_PUBLIC_SITE_URL`.
 - Supply a booking URL if you want direct scheduling; the inquiry fallback is already implemented.
-- Confirm a FormSubmit test inquiry reaches bhupendrastha2024@gmail.com after completing CAPTCHA.
+- Confirm a FormSubmit test inquiry reaches bhupendrastha2024@gmail.com using the on-page submission flow.
 - Replace or remove the three About placeholders; approve the proposed services and scopes.
 - Review the three starter articles, publication dates, and statuses.
 - Review the generated hero/About portraits and optionally supply social URLs.

@@ -15,11 +15,12 @@ const fields = [
 
 export default function InquiryForm() {
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const [state, setState] = useState<"idle" | "loading" | "error">("idle");
+  const [state, setState] = useState<"idle" | "loading" | "error" | "success">("idle");
   const [status, setStatus] = useState("");
   const [enhanced, setEnhanced] = useState(false);
   const busy = useRef(false);
   const started = useRef(Date.now());
+  const requestId = useRef("");
   const statusRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -36,7 +37,7 @@ export default function InquiryForm() {
 
   async function submit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    if (busy.current) return;
+    if (busy.current || state === "success") return;
     const form = e.currentTarget;
     const data = Object.fromEntries(new FormData(form));
     const result = validateInquiry(data);
@@ -51,40 +52,36 @@ export default function InquiryForm() {
     }
     busy.current = true;
     setState("loading");
-    setStatus("Checking your details before opening secure submission…");
+    setStatus("Sending your inquiry… Please keep this page open.");
+    requestId.current ||= crypto.randomUUID();
     try {
       const response = await fetch("/api/inquiries", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...data, startedAt: started.current }),
-        signal: AbortSignal.timeout(12000),
+        body: JSON.stringify({ ...data, startedAt: started.current, requestId: requestId.current }),
+        signal: AbortSignal.timeout(25000),
       });
       const validation = await response.json();
-      if (!response.ok || validation.validated !== true) {
+      if (!response.ok || validation.accepted !== true) {
         setErrors(validation.errors || {});
         throw new Error(
           validation.error ||
-            "Please try again or contact me by email. Your inquiry has not been sent.",
+            "We could not confirm submission. Your details are still here. Please try again or email me.",
         );
       }
-      for (const [name, value] of Object.entries(result.clean)) {
-        const field = form.elements.namedItem(name) as
-          HTMLInputElement | HTMLTextAreaElement | null;
-        if (field) field.value = value;
-      }
+      setState("success");
+      form.reset();
       setStatus(
-        "Opening FormSubmit. Complete its security check to finish sending your inquiry.",
+        "Thank you! FormSubmit accepted your inquiry for delivery. I’ll reply using the contact details you provided. A consultation time has not been reserved yet.",
       );
-      // Native POST retains FormSubmit's built-in CAPTCHA and provider result page.
-      // Validation is not delivery: this site never announces success here.
-      HTMLFormElement.prototype.submit.call(form);
+      requestAnimationFrame(() => statusRef.current?.focus());
     } catch (error) {
       busy.current = false;
       setState("error");
       setStatus(
         error instanceof Error && error.name !== "TimeoutError"
           ? error.message
-          : "The connection timed out. Please retry or email me. Your inquiry has not been sent.",
+          : "We could not confirm submission because the connection timed out. Your details are still here. Please retry or email me.",
       );
       requestAnimationFrame(() => statusRef.current?.focus());
     }
@@ -93,7 +90,7 @@ export default function InquiryForm() {
   return (
     <form
       className="inquiry-form"
-      action={`https://formsubmit.co/${business.email}`}
+      action="/api/inquiries"
       method="POST"
       onSubmit={submit}
       noValidate={enhanced}
@@ -112,9 +109,9 @@ export default function InquiryForm() {
         not reserve a time.
       </p>
       <p className="small">
-        After sending, complete FormSubmit’s security check. It will show the
-        submission result.
+        Send your inquiry here. You’ll see its submission status on this page.
       </p>
+      <noscript>Please enable JavaScript to send this form, or email {business.email}.</noscript>
       <div className="form-grid">
         {fields.map(([name, label, type, required]) => (
           <div
@@ -182,16 +179,16 @@ export default function InquiryForm() {
         <div
           ref={statusRef}
           tabIndex={-1}
-          className="form-status"
+          className={"form-status" + (state === "success" ? " success" : "")}
           role={state === "error" ? "alert" : "status"}
         >
           {status}
         </div>
       )}
-      <button className="button" type="submit" disabled={state === "loading"}>
+      <button className="button" type="submit" disabled={!enhanced || state === "loading" || state === "success"}>
         {state === "loading"
-          ? "Opening secure submission…"
-          : "Send consultation inquiry"}{" "}
+          ? "Sending your inquiry…"
+          : state === "success" ? "Inquiry submitted" : "Send consultation inquiry"}{" "}
         <span aria-hidden="true">↗</span>
       </button>
       <div className="privacy" id="privacy">
@@ -199,9 +196,9 @@ export default function InquiryForm() {
         <p>
           Your details are used to review your inquiry and reply to you. They
           are sent through FormSubmit to {business.email}. FormSubmit processes
-          the submission, uses CAPTCHA to reduce spam, and retains submissions
+          the submission and retains submissions
           in its archive for 30 days. This website does not store inquiries in a
-          database or add you to a marketing list. Please avoid sharing
+          database or add you to a marketing list. Temporary submission identifiers and rate limits help prevent spam and repeat requests. Please avoid sharing
           passwords or sensitive information.
         </p>
         <a className="text-link" href="https://formsubmit.co/privacy.pdf">

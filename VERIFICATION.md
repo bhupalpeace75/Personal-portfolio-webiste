@@ -1,13 +1,13 @@
-# Verification — updated 13 October 2026
+# Verification — updated 14 October 2026
 
 ## Current form integration
 
-- The form posts to `https://formsubmit.co/bhupendrastha2024@gmail.com`, using the subject `New consultation inquiry — Digital Bhupendra` and table formatting.
-- A real browser test reached FormSubmit's activation page. FormSubmit reported that it sent an activation email; the owner confirmed clicking the activation link successfully.
-- A second real browser submission passed website validation and reached the activated provider's CAPTCHA page. The owner confirmed completing CAPTCHA, seeing the thank-you page, and receiving the test email at bhupendrastha2024@gmail.com.
-- 12 automated tests pass: client/server required fields, email and URL validation, input limits, same-origin checks, honeypot/minimum time, malformed input, canonical-origin handling, and the distinction between validation and delivery.
-- Native provider submission retains CAPTCHA. The website does not announce delivery success during preflight, fake an email receipt, or reserve a consultation time.
-- Browser required-field validation focuses the first invalid field. Submitted test data reached the provider. Repeat clicks are locked while opening submission.
+- The browser posts to its own `/api/inquiries`; the server submits cleaned fields to FormSubmit's AJAX endpoint for `bhupendrastha2024@gmail.com`. The subject remains `New consultation inquiry — Digital Bhupendra` with table formatting.
+- Before this update, the owner confirmed live-domain activation and receipt of the native submission test email.
+- A real local browser submission through the new endpoint received provider acceptance and displayed the success status while retaining `/contact` in the address bar. Acceptance is not a claim of inbox receipt or a reserved meeting.
+- 15 automated tests pass, including validation, origin checks, honeypot/minimum time, provider rejection, malformed provider responses, network failure, concurrent duplicates, and rate limiting. Unit tests mock the provider; the browser acceptance check used the real provider.
+- Required-field validation focuses the first invalid field. The loading button is disabled and accepted submissions cannot be accidentally resubmitted by repeated clicks.
+- Bounded, hashed in-memory rate and receipt maps are per server instance; they are not a durable distributed guarantee. No CAPTCHA-disabling field is sent.
 - No Resend or Turnstile credentials are required. Privacy copy describes FormSubmit processing and its 30-day submission archive.
 
 ## Website checks
@@ -22,7 +22,7 @@
 ## Remaining limits
 
 - Inbox delivery was confirmed by the owner; the assistant does not have direct access to the Gmail inbox.
-- Production domain/DNS/HTTPS, final deployed-site delivery checks, optional booking URL, and social URLs remain unconfigured.
+- The site is deployed at `https://cafe.bhupendrashrestha.com.np`. A booking URL and social URLs remain optional configuration. Inbox receipt for the new background submission flow requires owner confirmation.
 - A full screen-reader audit or WCAG certification has not been performed.
 
-Saved screenshots are in `verification/`. Earlier Resend delivery mocks were replaced by current FormSubmit preflight tests; the live website has no simulated delivery mode.
+Earlier screenshots are in `verification/`. The current endpoint has no simulated delivery mode.
