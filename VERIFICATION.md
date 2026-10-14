@@ -2,12 +2,12 @@
 
 ## Current form integration
 
-- The browser posts to its own `/api/inquiries`; the server submits cleaned fields to FormSubmit's AJAX endpoint for `bhupendrastha2024@gmail.com`. The subject remains `New consultation inquiry — Digital Bhupendra` with table formatting.
+- The browser first validates with `/api/inquiries`, then sends cleaned fields directly to FormSubmit's AJAX endpoint for `bhupendrastha2024@gmail.com`. The subject remains `New consultation inquiry — Digital Bhupendra` with table formatting.
 - Before this update, the owner confirmed live-domain activation and receipt of the native submission test email.
 - A real local browser submission through the new endpoint received provider acceptance and displayed the success status while retaining `/contact` in the address bar. Acceptance is not a claim of inbox receipt or a reserved meeting.
-- 15 automated tests pass, including validation, origin checks, honeypot/minimum time, provider rejection, malformed provider responses, network failure, concurrent duplicates, and rate limiting. Unit tests mock the provider; the browser acceptance check used the real provider.
+- 15 automated tests cover validation, origin checks, honeypot/minimum time, provider rejection, malformed provider responses, network failure, the distinction between validation and delivery, and rate limiting. Provider unit tests use mocks.
 - Required-field validation focuses the first invalid field. The loading button is disabled and accepted submissions cannot be accidentally resubmitted by repeated clicks.
-- Bounded, hashed in-memory rate and receipt maps are per server instance; they are not a durable distributed guarantee. No CAPTCHA-disabling field is sent.
+- Bounded, hashed in-memory rate records are per server instance and cover the website validation endpoint; they are not a distributed limit on the public provider endpoint. No CAPTCHA-disabling field is sent.
 - No Resend or Turnstile credentials are required. Privacy copy describes FormSubmit processing and its 30-day submission archive.
 
 ## Website checks

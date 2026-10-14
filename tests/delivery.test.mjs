@@ -2,6 +2,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { randomUUID } from "node:crypto";
 import { handleInquiry } from "../lib/inquiries.mjs";
+import { sendInquiry } from "../lib/formsubmit.mjs";
 const data = () => ({
   name: "Test Visitor",
   email: "test@example.com",
@@ -22,7 +23,7 @@ const request = (body = data(), origin = "https://example.com") =>
   });
 const env = { INQUIRY_TO: "owner@example.com" };
 test("sends validated fields to FormSubmit AJAX and only reports confirmed acceptance", async () => {
-  const r = await handleInquiry(request(), env, async (url, options) => {
+  await sendInquiry({ email: "test@example.com" }, env.INQUIRY_TO, async (url, options) => {
     assert.equal(url, "https://formsubmit.co/ajax/owner%40example.com");
     const body = JSON.parse(options.body);
     assert.equal(body.email, "test@example.com");
@@ -31,8 +32,6 @@ test("sends validated fields to FormSubmit AJAX and only reports confirmed accep
     assert.equal(body._captcha, undefined);
     return Response.json({ success: "true" });
   });
-  assert.equal(r.status, 200);
-  assert.deepEqual(await r.json(), { accepted: true });
 });
 
 test("provider failures, unconfirmed responses and network errors never show success", async () => {
@@ -42,26 +41,19 @@ test("provider failures, unconfirmed responses and network errors never show suc
     async () => new Response("not json"),
     async () => { throw new Error("timeout"); },
   ]) {
-    const r = await handleInquiry(new Request(request(), { headers: { Origin: "https://example.com", "Content-Type": "application/json", "x-forwarded-for": randomUUID() } }), env, mock);
-    assert.equal(r.status, 502);
-    assert.equal((await r.json()).accepted, undefined);
+    await assert.rejects(sendInquiry({ email: "test@example.com" }, env.INQUIRY_TO, mock));
   }
 });
 
-test("concurrent duplicate requests share one provider submission", async () => {
-  const input = data();
-  let sends = 0;
-  const mock = async () => { sends++; return Response.json({ success: true }); };
-  const results = await Promise.all([handleInquiry(request(input), env, mock), handleInquiry(request(input), env, mock)]);
-  assert.equal(sends, 1);
-  assert.ok(results.every(r => r.status === 200));
+test("server validation does not claim provider delivery", async () => {
+  const result = await handleInquiry(request(), env);
+  assert.deepEqual(await result.json(), { validated: true });
 });
 
 test("rate limit stops repeated distinct submissions", async () => {
   const address = randomUUID();
-  const mock = async () => Response.json({ success: true });
   for (let i = 0; i < 6; i++) {
-    const r = await handleInquiry(new Request(request(), { headers: { Origin: "https://example.com", "Content-Type": "application/json", "x-forwarded-for": address } }), env, mock);
+    const r = await handleInquiry(new Request(request(), { headers: { Origin: "https://example.com", "Content-Type": "application/json", "x-forwarded-for": address } }), env);
     assert.equal(r.status, i === 5 ? 429 : 200);
   }
 });

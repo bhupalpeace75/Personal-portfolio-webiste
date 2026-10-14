@@ -2,6 +2,7 @@
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import { validateInquiry } from "@/lib/validation.mjs";
 import { business } from "@/lib/business";
+import { sendInquiry } from "@/lib/formsubmit.mjs";
 
 const fields = [
   ["name", "Full name", "text", true],
@@ -62,13 +63,14 @@ export default function InquiryForm() {
         signal: AbortSignal.timeout(25000),
       });
       const validation = await response.json();
-      if (!response.ok || validation.accepted !== true) {
+      if (!response.ok || validation.validated !== true) {
         setErrors(validation.errors || {});
         throw new Error(
           validation.error ||
             "We could not confirm submission. Your details are still here. Please try again or email me.",
         );
       }
+      await sendInquiry(result.clean, business.email);
       setState("success");
       form.reset();
       setStatus(
@@ -79,7 +81,7 @@ export default function InquiryForm() {
       busy.current = false;
       setState("error");
       setStatus(
-        error instanceof Error && error.name !== "TimeoutError"
+        error instanceof Error && error.name !== "TimeoutError" && error.name !== "TypeError"
           ? error.message
           : "We could not confirm submission because the connection timed out. Your details are still here. Please retry or email me.",
       );
@@ -198,7 +200,7 @@ export default function InquiryForm() {
           are sent through FormSubmit to {business.email}. FormSubmit processes
           the submission and retains submissions
           in its archive for 30 days. This website does not store inquiries in a
-          database or add you to a marketing list. Temporary submission identifiers and rate limits help prevent spam and repeat requests. Please avoid sharing
+          database or add you to a marketing list. Temporary rate-limit records help reduce spam. Please avoid sharing
           passwords or sensitive information.
         </p>
         <a className="text-link" href="https://formsubmit.co/privacy.pdf">
