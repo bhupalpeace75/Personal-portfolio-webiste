@@ -67,7 +67,7 @@ If you change `business.email` in `lib/business.ts`, the submission recipient ch
 Official references: [AJAX submission](https://formsubmit.co/ajax-documentation), [field options and data retention](https://formsubmit.co/documentation), [privacy policy](https://formsubmit.co/privacy.pdf).
 ## Deploy
 
-This project needs a Node-capable Next.js host because the inquiry endpoint performs server-side validation and delivery. It is not a static export. The current live site is https://cafe.bhupendrashrestha.com.np.
+This project needs a Node-capable Next.js host because the inquiry endpoint performs server-side validation. It is not a static export. The current live site is https://cafe.bhupendrashrestha.com.np.
 
 For Vercel or another Next.js host, import the source repository, choose the Next.js preset, and set the environment variables above in the host dashboard. Use `npm ci` and `npm run build`; for a self-hosted Node server use `npm start` behind an HTTPS reverse proxy. The server must receive the original `Host` header. `NEXT_PUBLIC_SITE_URL` must match the origin visitors use, including `www` if applicable; redirect alternate hostnames to that origin. Keep secrets out of Git and rebuild when public variables change.
 
@@ -91,3 +91,5 @@ See `VERIFICATION.md` for the checks actually performed and remaining verificati
 Headings, portraits, cards, and sections have subtle one-time scroll entrances. Button arrows and navigation links respond to hover/focus. Motion respects reduced-motion preferences. See ANIMATIONS.md for configuration and verification details.
 
 FormSubmit delivery verification: on 13 October 2026 the owner confirmed activation, completion of the provider security check, the thank-you page, and receipt of the test email at bhupendrastha2024@gmail.com.
+
+On 14 October 2026, the live form was updated to background AJAX submission. A real live-domain test showed the success message on Contact without redirecting, and the owner confirmed receipt of the email containing `FINAL BROWSER AJAX TEST`.
