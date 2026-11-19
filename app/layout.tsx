@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Header from "@/components/Header";
 import { Footer } from "@/components/Site";
 import ContentMotion from "@/components/ContentMotion";
+import MetaPixel from "@/components/MetaPixel";
 import { business, siteUrl } from "@/lib/business";
 import "./globals.css";
 export const metadata: Metadata = {
@@ -24,6 +25,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
       <body>
+        <MetaPixel />
         <a className="skip-link" href="#main">
           Skip to content
         </a>

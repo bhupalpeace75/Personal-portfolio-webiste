@@ -1,6 +1,6 @@
 # Digital Bhupendra portfolio
 
-A complete Next.js 16 / TypeScript website for Bhupendra Shrestha, with responsive CSS, reusable layouts, eight service pages, Markdown articles, and a server-side consultation inquiry endpoint. No analytics or tracking scripts are installed. System fonts avoid external font requests; abstract graphics are original CSS and SVG assets.
+A complete Next.js 16 / TypeScript website for Bhupendra Shrestha, with responsive CSS, reusable layouts, eight service pages, Markdown articles, and a server-side consultation inquiry endpoint. Meta Pixel is installed with pixel ID `1043956948104510` and tracks initial page loads plus client-side page navigation. System fonts avoid external font requests; abstract graphics are original CSS and SVG assets.
 
 ## Run locally
 
